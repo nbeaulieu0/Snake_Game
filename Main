@@ -1,0 +1,85 @@
+import pygame, sys, math, random
+
+pygame.init()
+
+white = (255,255,255)
+black = (0,0,0)
+red = (255,0,0)
+
+clock = pygame.time.Clock()
+
+screenWidth = 800
+screenHeight = 600
+gameDisplay = pygame.display.set_mode((screenWidth, screenHeight))
+
+pygame.display.set_caption('Slither')
+pygame.display.update()
+
+FPS = 15
+gameExit = False
+
+snakeX = screenWidth/2
+snakeY = screenHeight/2
+snakeSpeedX = 0
+snakeSpeedY = 0
+moveSpeed = 10
+
+while not gameExit:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            gameExit = True
+
+#snake movement
+    if event.type == pygame.KEYDOWN:
+
+        if event.key == pygame.K_LEFT:
+            if snakeSpeedX > 0:
+                snakeSpeedX = moveSpeed
+            else:
+                snakeSpeedX = -moveSpeed
+                snakeSpeedY = 0
+
+        elif event.key == pygame.K_RIGHT:
+            if snakeSpeedX < 0:
+                snakeSpeedX = -moveSpeed
+            else:
+                snakeSpeedX = moveSpeed
+                snakeSpeedY = 0
+
+        elif event.key == pygame.K_UP:
+            if snakeSpeedY > 0:
+                snakeSpeedY = moveSpeed
+            else:
+                snakeSpeedY = -moveSpeed
+                snakeSpeedX = 0
+
+        elif event.key == pygame.K_DOWN:
+            if snakeSpeedY < 0:
+                snakeSpeedY = -moveSpeed
+            else:
+                snakeSpeedY = moveSpeed
+                snakeSpeedX = 0
+
+            
+    snakeX += snakeSpeedX
+    snakeY += snakeSpeedY
+
+#resets snake when out of bounds
+    if snakeX < 0 or snakeX > screenWidth or snakeY < 0 or snakeY > screenHeight:
+        snakeX = screenWidth/2
+        snakeY = screenHeight/2
+        snakeSpeedX = 0
+        snakeSpeedY = 0
+
+#spawn food
+    
+
+    gameDisplay.fill(black)
+    pygame.draw.rect(gameDisplay, white, [snakeX, snakeY, 10, 10])
+    pygame.display.update()
+
+    clock.tick(FPS)
+
+pygame.quit()
+sys.exit()
+quit()
