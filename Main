@@ -1,11 +1,13 @@
-import pygame, sys, math, random
+import pygame, sys, math, random, time
 
 pygame.init()
 
 white = (255,255,255)
 black = (0,0,0)
 red = (255,0,0)
+green = (0,150,0)
 
+FPS = 30
 clock = pygame.time.Clock()
 
 screenWidth = 800
@@ -15,71 +17,136 @@ gameDisplay = pygame.display.set_mode((screenWidth, screenHeight))
 pygame.display.set_caption('Snake')
 pygame.display.update()
 
-FPS = 15
-gameExit = False
+font = pygame.font.SysFont(None, 25)
 
-snakeX = screenWidth/2
-snakeY = screenHeight/2
-snakeSpeedX = 0
-snakeSpeedY = 0
-moveSpeed = 10
+def snake(snakeWidth, snakeList):
+    for segment in snakeList:
+        pygame.draw.rect(gameDisplay, green, [segment[0], segment[1], snakeWidth, snakeWidth])
 
-while not gameExit:
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            gameExit = True
+def food(foodX, foodY, snakeWidth):
+    pygame.draw.rect(gameDisplay, red, [foodX, foodY, snakeWidth, snakeWidth])
 
-#snake movement
-    if event.type == pygame.KEYDOWN:
+def message_to_screen(msg, color):
+    screen_text = font.render(msg, True, color)
+    gameDisplay.blit(screen_text, [screenWidth/4, screenHeight/4])
 
-        if event.key == pygame.K_LEFT:
-            if snakeSpeedX > 0:
-                snakeSpeedX = moveSpeed
-            else:
-                snakeSpeedX = -moveSpeed
-                snakeSpeedY = 0
+def gameLoop():
 
-        elif event.key == pygame.K_RIGHT:
-            if snakeSpeedX < 0:
-                snakeSpeedX = -moveSpeed
-            else:
-                snakeSpeedX = moveSpeed
-                snakeSpeedY = 0
+    gameExit = False
+    gameOver = False
 
-        elif event.key == pygame.K_UP:
-            if snakeSpeedY > 0:
-                snakeSpeedY = moveSpeed
-            else:
-                snakeSpeedY = -moveSpeed
-                snakeSpeedX = 0
+    snakeX = screenWidth/2
+    snakeY = screenHeight/2
+    snakeSpeedX = 0
+    snakeSpeedY = 0
+    moveSpeed = 10
+    snakeWidth = 10
 
-        elif event.key == pygame.K_DOWN:
-            if snakeSpeedY < 0:
-                snakeSpeedY = -moveSpeed
-            else:
-                snakeSpeedY = moveSpeed
-                snakeSpeedX = 0
+    snakeList = []
+    snakeLength = 1
 
-            
-    snakeX += snakeSpeedX
-    snakeY += snakeSpeedY
-
-#resets snake when out of bounds
-    if snakeX < 0 or snakeX > screenWidth or snakeY < 0 or snakeY > screenHeight:
-        snakeX = screenWidth/2
-        snakeY = screenHeight/2
-        snakeSpeedX = 0
-        snakeSpeedY = 0
-
-#spawn food
+    foodWidth = 20
+    foodX = random.randrange(0, screenWidth-snakeWidth, foodWidth)
+    foodY = random.randrange(0, screenHeight-snakeWidth, foodWidth)
     
+    while not gameExit:
 
-    gameDisplay.fill(black)
-    pygame.draw.rect(gameDisplay, white, [snakeX, snakeY, 10, 10])
-    pygame.display.update()
+        while gameOver == True:
+            gameDisplay.fill(white)
+            message_to_screen("Game over. Press C to continue or Q to quit", red)
+            pygame.display.update()
 
-    clock.tick(FPS)
+            for event in pygame.event.get():
+                if event.type ==pygame.QUIT:
+                    gameExit = True
+                    gameOver = False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_q:
+                        gameExit = True
+                        gameOver = False
+                    elif event.key == pygame.K_c:
+                        gameLoop() 
+                        gameOver = False
+            
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                gameExit = True
 
-pygame.quit()
-sys.exit()
-quit()
+        #snake movement
+            elif event.type == pygame.KEYDOWN:
+
+                if event.key == pygame.K_LEFT:
+                    if snakeSpeedX > 0:
+                        snakeSpeedX = moveSpeed
+                    else:
+                        snakeSpeedX = -moveSpeed
+                        snakeSpeedY = 0
+
+                elif event.key == pygame.K_RIGHT:
+                    if snakeSpeedX < 0:
+                        snakeSpeedX = -moveSpeed
+                    else:
+                        snakeSpeedX = moveSpeed
+                        snakeSpeedY = 0
+
+                elif event.key == pygame.K_UP:
+                    if snakeSpeedY > 0:
+                        snakeSpeedY = moveSpeed
+                    else:
+                        snakeSpeedY = -moveSpeed
+                        snakeSpeedX = 0
+
+                elif event.key == pygame.K_DOWN:
+                    if snakeSpeedY < 0:
+                        snakeSpeedY = -moveSpeed
+                    else:
+                        snakeSpeedY = moveSpeed
+                        snakeSpeedX = 0
+
+                    
+        snakeX += snakeSpeedX
+        snakeY += snakeSpeedY
+
+
+        #resets snake when out of bounds
+        if snakeX < 0 or snakeX > screenWidth-snakeWidth or snakeY < 0 or snakeY > screenHeight-snakeWidth:
+            gameOver = True
+
+        
+        gameDisplay.fill(white)
+
+        #spawn initial food
+        food(foodX, foodY, foodWidth)
+
+        
+        snakeHead = []
+        snakeHead.append(snakeX)
+        snakeHead.append(snakeY)
+        snakeList.append(snakeHead)
+
+        if len(snakeList) > snakeLength:
+            del snakeList[0]
+
+        for eachSegment in snakeList[:-1]:
+            if eachSegment == snakeHead:
+                gameOver = True
+
+        snake(snakeWidth, snakeList)
+
+        pygame.display.update()
+
+        #eat food and spawn new food
+
+        if snakeX >= foodX and snakeX < foodX+foodWidth and snakeY >= foodY and snakeY < foodY+foodWidth:
+                foodX = random.randrange(0, screenWidth-foodWidth, foodWidth)
+                foodY = random.randrange(0, screenHeight-foodWidth, foodWidth)
+                snakeLength += 4            
+            
+
+        clock.tick(FPS)
+        
+    pygame.quit()
+    quit()
+    sys.exit()
+
+gameLoop()
