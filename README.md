@@ -1,2 +1,3 @@
 # Snake_Game
-Snake remake in Python
+
+Snake remake coded in Python
